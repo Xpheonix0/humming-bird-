@@ -207,7 +207,8 @@ PATTERNS = {
     "has_groups": False,  # or True if keyword-based
 }
 
-Then add to ORDERED_CATEGORIES at the right position"""
+Then add to ORDERED_CATEGORIES at the right position
+"""
 
 ORDERED_CATEGORIES = [
     "EMAIL",
