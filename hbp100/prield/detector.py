@@ -43,7 +43,7 @@ class Detector:
             joblib.exceptions.JoblibException: If the file exists but cannot
                 be deserialized (e.g., incompatible sklearn version).
         """
-        model_path = files("prield") / "pridel.pkl"
+        model_path = files("hbp100/pridel/model/) /"pridel.pkl"
         self.model = joblib.load(model_path)
 
     def has_pii(self, text: str) -> bool:
