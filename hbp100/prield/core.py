@@ -1,12 +1,12 @@
-"""Core pipeline: detector → (optional reasoner) → masker.
+"""Core pipeline: detector → reasoner → masker.
 
-This module provides both a simple functional interface and an 
-object-oriented interface that allows configuration per instance.
+Updated to integrate the Reasoner between detection and masking stages.
 """
 
 from typing import Optional
 from .detector import Detector
 from .masker import Masker
+from .reasoner import Reasoner
 from .schemas import SanitizeResult
 
 
@@ -14,42 +14,54 @@ class Pield:
     """Main privacy firewall engine with configurable components.
     
     This class allows creating multiple instances with different 
-    configurations, such as using different detector models or
-    enabling/disabling specific masking rules.
+    configurations, such as using different detector models, reasoner
+    policies, or masking rules.
     
-    The name "Pield" combines "Privacy" + "Shield" – it's the
-    firewall that protects your LLM prompts from leaking PII.
+    The complete pipeline:
+    1. **Detector (Pridel)**: ML classifier – "Does this text contain PII?"
+    2. **Reasoner**: Context analyzer – "Should this specific entity be masked?"
+    3. **Masker**: Rule-based engine – "Replace sensitive values with placeholders"
     
     Attributes:
         detector: The ML detector instance for PII classification.
+        reasoner: The context-aware reasoning engine.
         masker: The rule-based masking engine.
         
     Example:
-        >>> # Default usage
+        >>> # Default usage with all components
         >>> pield = Pield()
-        >>> result = pield.sanitize("My email is john@example.com")
-        >>> print(result.has_pii)
-        True
-        
-        >>> # Custom configuration for financial domain
-        >>> finance_detector = Detector()  # Could load finance-specific model
-        >>> finance_pield = Pield(detector=finance_detector)
-        >>> result = finance_pield.sanitize("Account: 1234567890")
+        >>> result = pield.sanitize("My zodiac sign for 1990 is Leo")
+        >>> print(result.text)
+        'My zodiac sign for 1990 is Leo'  # YEAR kept due to zodiac context
+        >>> 
+        >>> # Without Reasoner (backward compatible)
+        >>> pield_no_reasoner = Pield(use_reasoner=False)
+        >>> result = pield_no_reasoner.sanitize("My zodiac sign for 1990 is Leo")
+        >>> print(result.text)
+        'My zodiac sign for [YEAR_1] is Leo'  # YEAR masked
     """
     
-    def __init__(self, detector: Optional[Detector] = None) -> None:
-        """Initialize the privacy firewall with optional custom detector.
+    def __init__(
+        self, 
+        detector: Optional[Detector] = None,
+        use_reasoner: bool = True
+    ) -> None:
+        """Initialize the privacy firewall.
         
         Args:
             detector: Optional pre-configured Detector instance. If None,
                 creates a default detector that loads the bundled model.
+            use_reasoner: If True (default), enables context-aware reasoning.
+                Set to False for backward compatibility or when you want
+                to mask all PII unconditionally.
                 
         Note:
-            Each Pield instance creates its own Masker. If you need
-            multiple instances, consider reusing detectors to avoid
+            Each Pield instance creates its own Masker and Reasoner.
+            For multiple instances, consider reusing detectors to avoid
             loading the model multiple times.
         """
         self.detector = detector or Detector()
+        self.reasoner = Reasoner() if use_reasoner else None
         self.masker = Masker()
     
     def sanitize(self, text: str) -> SanitizeResult:
@@ -57,8 +69,8 @@ class Pield:
 
         Pipeline stages:
         1. **Detection**: ML model checks if text contains PII
-        2. **(Future) Reasoning**: Context-aware masking decisions
-        3. **Masking**: Rule-based pattern replacement
+        2. **Reasoning**: Context-aware masking decisions for each entity
+        3. **Masking**: Rule-based pattern replacement for entities to mask
 
         If no PII is detected in stage 1, the original text is returned
         unchanged with an empty metadata dictionary. This short-circuit
@@ -77,28 +89,32 @@ class Pield:
             
         Example:
             >>> pield = Pield()
-            >>> result = pield.sanitize("OTP: 123456 and email: john@example.com")
-            >>> result.text
-            'OTP: [OTP_1] and email: [EMAIL_1]'
-            >>> result.metadata
-            {'[OTP_1]': '123456', '[EMAIL_1]': 'john@example.com'}
-            >>> result.has_pii
+            >>> 
+            >>> # Context-aware: year kept in zodiac query
+            >>> result = pield.sanitize("What's my horoscope for 1990?")
+            >>> "1990" in result.text
+            True
+            >>> 
+            >>> # Security-first: email always masked
+            >>> result = pield.sanitize("Email: john@example.com, year 1990")
+            >>> "john@example.com" not in result.text
+            True
+            >>> "1990" not in result.text
             True
         """
         # Stage 1: ML-based PII detection
         if not self.detector.has_pii(text):
             return SanitizeResult(text=text, metadata={}, has_pii=False)
         
-        # FUTURE: Stage 2 – Insert Reasoner here
-        # The reasoner could:
-        # - Determine which categories to mask based on context
-        # - Apply user consent preferences
-        # - Handle domain-specific logic
-        # reasoner = Reasoner()
-        # mask_categories = reasoner.decide(text, self.detector)
+        # Stage 2: Context-aware reasoning (if enabled)
+        # The Reasoner will be queried by the Masker for each entity
         
-        # Stage 3: Rule-based masking
-        masked_text, metadata = self.masker.mask(text)
+        # Stage 3: Rule-based masking with Reasoner integration
+        masked_text, metadata = self.masker.mask(
+            text,
+            reasoner=self.reasoner
+        )
+        
         return SanitizeResult(
             text=masked_text, 
             metadata=metadata, 
@@ -114,16 +130,9 @@ _default_pield = Pield()
 def sanitize(text: str) -> SanitizeResult:
     """Convenience function for one-shot sanitization using the default engine.
     
-    This is the simplest way to use prield:
-    
-        >>> from prield import sanitize
-        >>> result = sanitize("My email is john@example.com")
-        >>> print(result.text)
-        'My email is [EMAIL_1]'
-    
-    It uses a module-level Pield instance that's created once and reused.
-    For advanced use cases (multiple models, custom configurations), use
-    the Pield class directly.
+    Uses a pre-configured Pield instance with Reasoner enabled for
+    context-aware masking. This is the recommended way to use Pield
+    for most applications.
     
     Args:
         text: The raw input string to sanitize.
@@ -131,8 +140,17 @@ def sanitize(text: str) -> SanitizeResult:
     Returns:
         A ``SanitizeResult`` with the sanitized text and metadata.
         
-    Performance Note:
-        The first call loads the ML model (~10-50ms). Subsequent calls
-        are fast (~100-500µs for typical inputs).
+    Example:
+        >>> from prield import sanitize
+        >>> 
+        >>> # Horoscope context preserves years
+        >>> result = sanitize("What zodiac is 1990?")
+        >>> print(result.text)
+        'What zodiac is 1990?'
+        >>> 
+        >>> # Non-horoscope context masks years
+        >>> result = sanitize("I was born in 1990")
+        >>> print(result.text)
+        'I was born in [YEAR_1]'
     """
     return _default_pield.sanitize(text)
