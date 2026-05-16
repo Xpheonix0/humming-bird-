@@ -1,4 +1,4 @@
-"""prield – Ultra-light privacy firewall for LLM prompts.
+"""pield – Ultra-light privacy firewall for LLM prompts.
 
 A lightweight package that detects and masks Personally Identifiable 
 Information (PII) in text using a combination of ML classification,
@@ -11,7 +11,7 @@ Main Components:
     - sanitize: Convenience function for quick one-shot sanitization
 
 Example:
-    >>> from prield import sanitize
+    >>> from pield import sanitize
     >>> 
     >>> # Context-aware: year kept in horoscope query
     >>> result = sanitize("What's my horoscope for 1990?")

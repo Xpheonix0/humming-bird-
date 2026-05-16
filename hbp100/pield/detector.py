@@ -33,7 +33,7 @@ class Detector:
     def __init__(self) -> None:
         """Load the serialized sklearn pipeline from package resources.
         
-        The model is expected at ``prield/pridel.pkl`` relative to the
+        The model is expected at ``pield/pridel.pkl`` relative to the
         package installation directory. It uses ``importlib.resources``
         to locate the file robustly, even when the package is installed
         as a zip archive or wheel.

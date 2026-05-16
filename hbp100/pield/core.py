@@ -141,7 +141,7 @@ def sanitize(text: str) -> SanitizeResult:
         A ``SanitizeResult`` with the sanitized text and metadata.
         
     Example:
-        >>> from prield import sanitize
+        >>> from pield import sanitize
         >>> 
         >>> # Horoscope context preserves years
         >>> result = sanitize("What zodiac is 1990?")
