@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hbp100"
-version = "0.1.0"
+version = "0.1.5"
 description = "Ultra-light privacy firewall for LLM prompts"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,11 +25,11 @@ classifiers = [
 ]
 
 dependencies = [
-    "joblib>=1.2.0",
+    "joblib>=0.1.0",
 ]
 
 [project.urls]
-Repository = "https://github.com/Xpheonix0/humming-bird/"
+Repository = "https://github.com/Xpheonix0/humming-bird-/"
 
 [tool.setuptools.packages.find]
 include = ["pield*"]
