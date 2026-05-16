@@ -180,7 +180,11 @@ class Reasoner:
         text_lower = text.lower()
 
         # Rule 3: Astrological context – keep years
-        if self._is_zodiac_context(text_lower) and pii_type in {"YEAR", "YEAR_ONLY"}:
+        if self._is_zodiac_context(text_lower) and pii_type in {
+            "YEAR",
+            "YEAR_ONLY",
+            "BIRTH_YEAR",
+        }:
             return "KEEP"
 
         # Rule 4: Calendar conversion context – keep dates

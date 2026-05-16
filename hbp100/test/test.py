@@ -1,5 +1,10 @@
 from hbp100 import sanitize, Pield, Detector, Reasoner, SanitizeResult
+import sys
 import time
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
 
 def print_section(title):
@@ -263,7 +268,7 @@ def test_performance():
     print(f"⚡ Average detector latency: {avg_us:.1f} µs")
     
     # Test 3: Masker only (without Reasoner)
-    from pield.masker import Masker
+    from hbp100.pield.masker import Masker
     masker = Masker()
     
     start = time.perf_counter()
@@ -316,7 +321,7 @@ def test_package_info():
     """Display package information."""
     print_section("5. PACKAGE INFORMATION")
     
-    import pield
+    import hbp100 as pield
     import os
     from pathlib import Path
     
@@ -427,6 +432,7 @@ def main():
     
     all_passed = 0
     all_total = 0
+    suite_errors = 0
     
     # Run test suites
     test_suites = [
@@ -442,33 +448,36 @@ def main():
             all_passed += passed
             all_total += total
         except Exception as e:
+            suite_errors += 1
             print(f"\n❌ ERROR in {name} tests: {e}")
     
     # Performance (always runs)
     try:
         test_performance()
     except Exception as e:
+        suite_errors += 1
         print(f"\n❌ ERROR in performance tests: {e}")
     
     # Package info (always runs)
     try:
         test_package_info()
     except Exception as e:
+        suite_errors += 1
         print(f"\n❌ ERROR in package info: {e}")
     
     # Final summary
     print("\n" + "=" * 70)
     print(f"  TEST SUMMARY: {all_passed}/{all_total} passed", end="")
     
-    if all_passed == all_total:
+    if all_passed == all_total and suite_errors == 0:
         print(" 🎉 ALL TESTS PASSED!")
     else:
-        print(f" ({all_total - all_passed} failed)")
+        print(f" ({all_total - all_passed} failed, {suite_errors} errors)")
     
     print("=" * 70)
     
     # Size efficiency rating
-    import pield
+    import hbp100 as pield
     from pathlib import Path
     package_path = Path(pield.__file__).parent
     total_size = sum(f.stat().st_size for f in package_path.rglob('*') if f.is_file())
@@ -484,7 +493,7 @@ def main():
     else:
         print("   Rating: Moderate")
     
-    return all_passed == all_total
+    return all_passed == all_total and suite_errors == 0
 
 
 if __name__ == "__main__":

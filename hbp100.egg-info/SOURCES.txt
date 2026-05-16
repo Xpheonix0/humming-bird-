@@ -1,8 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-hbp100.egg-info/PKG-INFO
-hbp100.egg-info/SOURCES.txt
-hbp100.egg-info/dependency_links.txt
-hbp100.egg-info/requires.txt
-hbp100.egg-info/top_level.txt

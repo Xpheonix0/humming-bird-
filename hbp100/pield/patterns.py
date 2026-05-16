@@ -22,7 +22,7 @@ PATTERNS = {
     },
     "URL_TOKEN": {
         "regex": re.compile(
-            r"[?&](?:token|access_token|auth|api_key)=([^&\s]+)", re.IGNORECASE
+            r"([?&](?:token|access_token|auth|api_key)=)([^&\s]+)", re.IGNORECASE
         ),
         "has_groups": True,
     },
@@ -111,13 +111,13 @@ PATTERNS = {
     },
     "PASSWORD": {
         "regex": re.compile(
-            r"(password\s*[:=]\s*)(\S{4,})", re.IGNORECASE
+            r"(password\s*(?:[:=]|\bis\b)\s*)(\S{4,})", re.IGNORECASE
         ),
         "has_groups": True,
     },
     "OTP": {
         "regex": re.compile(
-            r"(otp|one\s*time\s*(?:password|code)|verification\s*code)\s*[:=]\s*(\d{4,6})",
+            r"((?:otp|one\s*time\s*(?:password|code)|verification\s*code)\s*(?:[:=]|\bis\b)\s*)(\d{4,6})",
             re.IGNORECASE,
         ),
         "has_groups": True,
@@ -130,7 +130,7 @@ PATTERNS = {
     },
     "SECURITY_ANSWER": {
         "regex": re.compile(
-            r"(security\s*answer|answer)\s*[:=]\s*(\S{3,})", re.IGNORECASE
+            r"((?:security\s*answer|answer)\s*[:=]\s*)(\S{3,})", re.IGNORECASE
         ),
         "has_groups": True,
     },
@@ -181,7 +181,7 @@ PATTERNS = {
     },
     "BIRTH_YEAR": {
         "regex": re.compile(
-            r"(born|birth\s*year|dob)\s*[:=]\s*(\d{4})", re.IGNORECASE
+            r"((?:born|birth\s*year|dob)\s*[:=]\s*)(\d{4})", re.IGNORECASE
         ),
         "has_groups": True,
     },
@@ -230,7 +230,6 @@ ORDERED_CATEGORIES = [
     "SSN",
     "PASSPORT",
     "DRIVER_LICENSE",
-    "PHONE",
     "PASSWORD",
     "OTP",
     "PIN",
@@ -246,4 +245,5 @@ ORDERED_CATEGORIES = [
     "YEAR_ONLY",
     "IMEI",
     "ADDRESS",
+    "PHONE",
 ]

@@ -5,7 +5,6 @@ so raw text can be passed directly to its predict method.
 """
 
 from importlib.resources import files
-import joblib
 
 
 class Detector:
@@ -43,7 +42,9 @@ class Detector:
             joblib.exceptions.JoblibException: If the file exists but cannot
                 be deserialized (e.g., incompatible sklearn version).
         """
-        model_path = files("hbp100.pridel.model) /"pridel.pkl"
+        import joblib
+
+        model_path = files("hbp100") / "pridel" / "model" / "pridel.pkl"
         self.model = joblib.load(model_path)
 
     def has_pii(self, text: str) -> bool:

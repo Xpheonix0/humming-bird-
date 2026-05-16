@@ -122,9 +122,9 @@ class Pield:
         )
 
 
-# Module-level convenience instance for the functional API
-# Created once at import time – model is loaded into memory
-_default_pield = Pield()
+# Module-level convenience instance for the functional API.
+# Created lazily on the first sanitize() call so imports stay lightweight.
+_default_pield: Optional[Pield] = None
 
 
 def sanitize(text: str) -> SanitizeResult:
@@ -153,4 +153,7 @@ def sanitize(text: str) -> SanitizeResult:
         >>> print(result.text)
         'I was born in [YEAR_1]'
     """
+    global _default_pield
+    if _default_pield is None:
+        _default_pield = Pield()
     return _default_pield.sanitize(text)
