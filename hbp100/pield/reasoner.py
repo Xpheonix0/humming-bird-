@@ -9,7 +9,7 @@ while masking them in identity contexts, or preserving dates in calendar
 conversion requests while masking birth years.
 """
 
-from typing import Set, FrozenSet
+from typing import FrozenSet
 
 
 class Reasoner:

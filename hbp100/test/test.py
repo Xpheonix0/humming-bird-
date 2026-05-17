@@ -321,29 +321,31 @@ def test_package_info():
     """Display package information."""
     print_section("5. PACKAGE INFORMATION")
     
-    import hbp100 as pield
-    import os
+    import hbp100
     from pathlib import Path
     
     # Version
-    print(f"📦 Version: {pield.__version__}")
+    print(f"📦 Version: {hbp100.__version__}")
     
     # Size
-    package_path = Path(pield.__file__).parent
+    package_path = Path(hbp100.__file__).parent
     total_size = sum(f.stat().st_size for f in package_path.rglob('*') if f.is_file())
     print(f"📦 Package size: {total_size / 1024:.1f} KB ({total_size} bytes)")
     
     # Model size
-    model_path = package_path / "pridel.pkl"
+    model_path = package_path / "pridel" / "model" / "pridel.pkl"
     if model_path.exists():
         model_size = model_path.stat().st_size
         print(f"📦 Model size: {model_size / 1024:.1f} KB ({model_size} bytes)")
     
     # Exports
-    print(f"📦 Exports: {pield.__all__}")
+    print(f"📦 Exports: {hbp100.__all__}")
     
     # Files
-    py_files = list(package_path.glob("*.py"))
+    py_files = [
+        f for f in package_path.rglob("*.py")
+        if "__pycache__" not in f.parts
+    ]
     print(f"📦 Python modules: {len(py_files)}")
     for f in sorted(py_files):
         print(f"   - {f.name} ({f.stat().st_size} bytes)")
@@ -477,9 +479,9 @@ def main():
     print("=" * 70)
     
     # Size efficiency rating
-    import hbp100 as pield
+    import hbp100
     from pathlib import Path
-    package_path = Path(pield.__file__).parent
+    package_path = Path(hbp100.__file__).parent
     total_size = sum(f.stat().st_size for f in package_path.rglob('*') if f.is_file())
     
     print(f"\n📊 Efficiency Rating:")

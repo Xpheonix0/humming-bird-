@@ -105,19 +105,19 @@ PATTERNS = {
     },
     "PHONE": {
         "regex": re.compile(
-            r"(?:\+?\d{1,3}[-\s]?)?\(?\d{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,4}[-\s]?\d{1,9}"
+            r"(?<!\d)(?=(?:\D*\d){7,15}\D*(?!\d))(?:\+?\d{1,3}[-\s]?)?\(?\d{2,4}\)?[-\s]?\d{2,4}[-\s]?\d{2,4}(?:[-\s]?\d{2,9})?(?!\d)"
         ),
         "has_groups": False,
     },
     "PASSWORD": {
         "regex": re.compile(
-            r"(password\s*(?:[:=]|\bis\b)\s*)(\S{4,})", re.IGNORECASE
+            r"(password(?:\s*(?:[:=]|\bis\b)\s*|\s+))(\S{4,})", re.IGNORECASE
         ),
         "has_groups": True,
     },
     "OTP": {
         "regex": re.compile(
-            r"((?:otp|one\s*time\s*(?:password|code)|verification\s*code)\s*(?:[:=]|\bis\b)\s*)(\d{4,6})",
+            r"((?:otp|one\s*time\s*(?:password|code)|verification\s*code)(?:\s*(?:[:=]|\bis\b)\s*|\s+))(\d{4,6})",
             re.IGNORECASE,
         ),
         "has_groups": True,

@@ -88,6 +88,7 @@ class Masker:
             Only includes matches that should be masked.
         """
         matches = []
+        occupied_spans = []
         counters: dict[str, int] = defaultdict(int)
 
         for category in ORDERED_CATEGORIES:
@@ -97,7 +98,7 @@ class Masker:
 
             for match in regex.finditer(text):
                 # Skip overlapping regions (higher priority patterns win)
-                if self._is_overlapping(match.start(), match.end(), matches):
+                if self._is_overlapping(match.start(), match.end(), occupied_spans):
                     continue
 
                 # Extract the original value
@@ -110,7 +111,7 @@ class Masker:
                 if reasoner is not None:
                     action = reasoner.decide(text, category, original)
                     if action == "KEEP":
-                        # Skip masking – this entity should remain
+                        occupied_spans.append((match.start(), match.end()))
                         continue
                     # If "MASK", proceed with replacement
 
@@ -126,6 +127,7 @@ class Masker:
                 matches.append(
                     (match.start(), match.end(), replacement, original)
                 )
+                occupied_spans.append((match.start(), match.end()))
 
         return matches
 
@@ -133,7 +135,7 @@ class Masker:
         self, 
         start: int, 
         end: int, 
-        existing_matches: list
+        existing_spans: list
     ) -> bool:
         """Check if a new match overlaps with any previously recorded match.
         
@@ -143,12 +145,12 @@ class Masker:
         Args:
             start: Start index of the new match.
             end: End index of the new match.
-            existing_matches: List of already accepted matches.
+            existing_spans: List of already accepted or protected spans.
             
         Returns:
             True if the new match overlaps with any existing match.
         """
-        for ex_start, ex_end, _, _ in existing_matches:
+        for ex_start, ex_end in existing_spans:
             if start < ex_end and end > ex_start:
                 return True
         return False

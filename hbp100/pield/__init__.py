@@ -11,7 +11,7 @@ Main Components:
     - sanitize: Convenience function for quick one-shot sanitization
 
 Example:
-    >>> from pield import sanitize
+    >>> from hbp100 import sanitize
     >>> 
     >>> # Context-aware: year kept in horoscope query
     >>> result = sanitize("What's my horoscope for 1990?")

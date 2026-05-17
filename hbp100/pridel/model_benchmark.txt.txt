@@ -1,0 +1,20 @@
+
+# hbp100 Model Benchmark
+
+## Pridel ML Detector
+
+Type:               Logistic Regression + TF-IDF
+Features:           2,360
+N-gram range:       (1, 2)
+Model size:         133 KB
+Inference time:     773 us per call (us = microsecond)
+Training samples:   500
+Classes:            PII (1) / Clean (0)
+
+## Pipeline Speed
+
+Detector (ML):      773 us
+Masker (Regex):     103 us
+Reasoner:           3.4 us
+Total pipeline:     994 us
+Throughput:         1,000+ texts/second
